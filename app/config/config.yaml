@@ -1,0 +1,5 @@
+
+
+#details related to the server
+server_host: "localhost"
+server_port: 3000
