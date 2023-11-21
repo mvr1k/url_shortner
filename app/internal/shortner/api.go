@@ -45,18 +45,35 @@ func (w WebApi) GET(ctx *gin.Context) {
 		}
 		_ = api.SendResponse(http.StatusOK, respData, err.Error(), ctx)
 	} else {
-		w.manager.redirectToLongUrl(req, ctx)
+		err := w.manager.redirectToLongUrl(req, ctx)
+		if err != nil {
+			_ = api.SendResponse(http.StatusBadRequest, nil, err.Error(), ctx)
+			return
+		}
 	}
+
+}
+
+func (w WebApi) POST(ctx *gin.Context) {
+	w.GenerateContextID(ctx)
+	req, err := data.NewPostRequestFromHttpRequest(ctx)
+	if err != nil {
+		_ = api.SendResponse(http.StatusBadRequest, nil, err.Error(), ctx)
+		return
+	}
+	err = req.IsValid()
+	if err != nil {
+		_ = api.SendResponse(http.StatusBadRequest, nil, err.Error(), ctx)
+		//context based logging
+		return
+	}
+	res := w.manager.generateAndGetShortenedUrl(req.ClientId, req.LongUrl)
+	_ = api.SendResponse(http.StatusOK, res, "Completed URL shortning", ctx)
 
 }
 
 func (w WebApi) LIST(ctx *gin.Context) {
 	api.DefaultHandler(ctx)
-}
-
-func (w WebApi) POST(ctx *gin.Context) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func (w WebApi) PUT(ctx *gin.Context) {
@@ -78,7 +95,7 @@ func (w WebApi) OPTIONS(ctx *gin.Context) {
 
 func (w WebApi) GetRouteMapping() map[string]string {
 	mappings := map[string]string{
-		http.MethodGet:  moduleBasePath + "/:" + data.PathVariableForShortUrl,
+		http.MethodGet:  moduleBasePath + "/:" + data.PathVariableForUser + "/:" + data.PathVariableForShortUrl,
 		http.MethodPost: moduleBasePath,
 	}
 

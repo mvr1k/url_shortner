@@ -27,13 +27,13 @@ func NewServer(logger *zap.SugaredLogger) *Server {
 	return ser
 }
 
-/*ShutDownWithGrace in case of exit this will handle shutdown event with GRACE :)
- */
 func (server *Server) Start() error {
 	address := fmt.Sprintf("%v:%v", config.ServerHost, config.ServerPort)
 
 	return server.server.Run(address)
 }
+
+/*ShutDownWithGrace in case of exit this will handle shutdown event with GRACE :)*/
 func (server *Server) ShutDownWithGrace() {
 	server.logger.Infof("Good Bye Cruel World :( ")
 }
